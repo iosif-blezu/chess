@@ -18,7 +18,63 @@ def loadImages():  # load images
         IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
 
 
-def main():
+def highlightSquares(screen, gs, valid_moves, sq_selected):
+    if sq_selected != ():
+        r, c = sq_selected
+        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):  # selects a piece that can be moved
+            s = p.Surface((SQ_SIZE, SQ_SIZE))
+            s.set_alpha(100)  # val. transparency
+            s.fill(p.Color('light blue'))
+            screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
+            s.fill(p.Color('light blue'))
+            for move in valid_moves:
+                if move.startRow == r and move.startCol == c:
+                    screen.blit(s, (SQ_SIZE * move.endCol, move.endRow * SQ_SIZE))
+
+
+def drawGameState(screen, gs, valid_moves, sq_selected):
+    drawBoard(screen)  # draws board
+    highlightSquares(screen, gs, valid_moves, sq_selected)
+    drawPieces(screen, gs.board)  # draws pieces
+
+
+def drawBoard(screen):  # draws board
+    colors = [p.Color("#EFEFEF"), p.Color("#8877B7")]
+    for r in range(DIMENSION):
+        for c in range(DIMENSION):
+            color = colors[((r + c) % 2)]
+            p.draw.rect(screen, color, p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+def drawBoardConsole():
+    for r in range(DIMENSION):
+        for c in range(DIMENSION):
+            print("--")
+
+
+def drawPieces(screen, board):
+    for r in range(DIMENSION):
+        for c in range(DIMENSION):
+            piece = board[r][c]
+            if piece != "--":
+                screen.blit(IMAGES[piece], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+def drawPiecesConsole(board):
+    pass
+
+
+def drawText(screen, text):
+    # color = ('#FFFFFF')
+    # p.draw.rect(screen, color, p.Rect(300, 300, 200, 200))
+    font = p.font.SysFont("Arial", 60, True, True)
+    textObject = font.render(text, True, p.Color('Black'))
+    textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH / 2 - textObject.get_width() / 2,
+                                                    HEIGHT / 2 - textObject.get_height() / 2)
+    screen.blit(textObject, textLocation)
+
+
+def main_pygame():
     p.init()
     p.mixer.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
@@ -107,51 +163,20 @@ def main():
         p.display.flip()
 
 
-def highlightSquares(screen, gs, valid_moves, sq_selected):
-    if sq_selected != ():
-        r, c = sq_selected
-        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):  # selects a piece that can be moved
-            s = p.Surface((SQ_SIZE, SQ_SIZE))
-            s.set_alpha(100)  # val. transparency
-            s.fill(p.Color('light blue'))
-            screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
-            s.fill(p.Color('light blue'))
-            for move in valid_moves:
-                if move.startRow == r and move.startCol == c:
-                    screen.blit(s, (SQ_SIZE * move.endCol, move.endRow * SQ_SIZE))
+def main_console():
+    pass
 
-
-def drawGameState(screen, gs, valid_moves, sq_selected):
-    drawBoard(screen)  # draws board
-    highlightSquares(screen, gs, valid_moves, sq_selected)
-    drawPieces(screen, gs.board)  # draws pieces
-
-
-def drawBoard(screen):  # draws board
-    colors = [p.Color("#EFEFEF"), p.Color("#8877B7")]
-    for r in range(DIMENSION):
-        for c in range(DIMENSION):
-            color = colors[((r + c) % 2)]
-            p.draw.rect(screen, color, p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
-
-
-def drawPieces(screen, board):
-    for r in range(DIMENSION):
-        for c in range(DIMENSION):
-            piece = board[r][c]
-            if piece != "--":
-                screen.blit(IMAGES[piece], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
-
-
-def drawText(screen, text):
-    # color = ('#FFFFFF')
-    # p.draw.rect(screen, color, p.Rect(300, 300, 200, 200))
-    font = p.font.SysFont("Arial", 60, True, True)
-    textObject = font.render(text, True, p.Color('Black'))
-    textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH / 2 - textObject.get_width() / 2,
-                                                    HEIGHT / 2 - textObject.get_height() / 2)
-    screen.blit(textObject, textLocation)
 
 
 if __name__ == "__main__":
-    main()
+    print("Choose app type:")
+    print("  1. Console.")
+    print("  2. Visual.")
+
+    choice = input()
+    if choice == '1':
+        main_pygame()
+    elif choice == '2':
+        main_console()
+    else:
+        print("Invalid choice.")
