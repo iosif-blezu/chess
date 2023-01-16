@@ -66,7 +66,7 @@ def drawText(screen, text):
     screen.blit(textObject, textLocation)
 
 
-def main_pygame():
+def main_pygame(playerOne, playerTwo):
     global return_queue
     p.init()
     p.mixer.init()
@@ -95,8 +95,8 @@ def main_pygame():
     move_undone = False
     move_finder_process = None
 
-    playerOne = True   # if a human is playing white
-    playerTwo = False  # if human is playing black
+    # playerOne = True   # if a human is playing white
+    # playerTwo = False  # if human is playing black
 
     while running:
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
@@ -199,7 +199,7 @@ def drawBoardConsole(gs):
         print(gs.board[r])
 
 
-def main_console():
+def main_console(playerOne, playerTwo):
     global return_queue
     gs = ChessEngine.GameState()
     validMoves = gs.getValidMoves()
@@ -218,8 +218,8 @@ def main_console():
     move_undone = False
     move_finder_process = None
 
-    playerOne = True  # if a human is playing white
-    playerTwo = False  # if human is playing black
+    #playerOne = True  # if a human is playing white
+    #playerTwo = False  # if human is playing black
 
     while running:
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
@@ -274,6 +274,9 @@ def main_console():
                 moveMade = False
                 move_undone = False
 
+            else:
+                print("Invalid move. \n")
+
             drawGameStateConsole(gs)
 
             if gs.checkMate:
@@ -294,10 +297,51 @@ if __name__ == "__main__":
     print("  1. Console.")
     print("  2. Visual.")
 
-    choice = input()
-    if choice == '1':
-        main_console()
-    elif choice == '2':
-        main_pygame()
+    first_choice = input()
+
+    if first_choice == "1":
+        print("Choose mode:")
+        print("  1. Human vs. Human.")
+        print("  2. Human vs. AI as white.")
+        print("  3. Human vs. AI as black.")
+
+        choice = input()
+        if choice == '1':
+            playerOne = True
+            playerTwo = True
+            main_console(playerOne, playerTwo)
+
+        elif choice == '2':
+            playerOne = True
+            playerTwo = False
+            main_console(playerOne, playerTwo)
+
+        elif choice == '3':
+            playerOne = False
+            playerTwo = True
+            main_console(playerOne, playerTwo)
+
+    elif first_choice == "2":
+        print("Choose mode:")
+        print("  1. Human vs. Human.")
+        print("  2. Human vs. AI as white.")
+        print("  3. Human vs. AI as black.")
+
+        choice = input()
+        if choice == '1':
+            playerOne = True
+            playerTwo = True
+            main_pygame(playerOne, playerTwo)
+
+        elif choice == '2':
+            playerOne = True
+            playerTwo = False
+            main_pygame(playerOne, playerTwo)
+
+        elif choice == '3':
+            playerOne = False
+            playerTwo = True
+            main_pygame(playerOne, playerTwo)
+
     else:
         print("Invalid choice.")
