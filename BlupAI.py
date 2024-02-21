@@ -66,15 +66,6 @@ STALEMATE = 0
 DEPTH = 3
 
 
-def findBestMove(gs, valid_moves, return_queue):
-    global next_move
-    next_move = None
-    random.shuffle(valid_moves)
-    findMoveNegMaxAlphaBeta(gs, valid_moves, DEPTH, -CHECKMATE, CHECKMATE,
-                            1 if gs.whiteToMove else -1)
-    return_queue.put(next_move)
-
-
 def findMoveNegMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turn_multiplier):
     global next_move
     if depth == 0:
@@ -98,29 +89,38 @@ def findMoveNegMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turn_multiplier)
 
 def scoreBoard(gs):
     """
-    Score the board. A positive score is good for white, a negative score is good for black.
+    Improved scoring function considering additional factors.
     """
-    if gs.checkMate:
-        if gs.whiteToMove:
-            return -CHECKMATE  # black wins
-        else:
-            return CHECKMATE  # white wins
-    elif gs.staleMate:
-        return STALEMATE
-    score = 0
-    for row in range(len(gs.board)):
-        for col in range(len(gs.board[row])):
-            piece = gs.board[row][col]
-            if piece != "--":
-                piece_position_score = 0
-                if piece[1] != "K":
-                    piece_position_score = piece_position_scores[piece][row][col]
-                if piece[0] == "w":
-                    score += piece_score[piece[1]] + piece_position_score
-                if piece[0] == "b":
-                    score -= piece_score[piece[1]] + piece_position_score
+    # Basic score from piece values and positions
+    score = basicScore(gs)
+
+    # Consider additional factors here (mobility, king safety, pawn structure)
+    # Mobility example (simplified for illustration):
+    mobility = len(gs.getValidMoves())
+    if gs.whiteToMove:
+        score += mobility * 0.1  # Adjust multiplier to balance the evaluation
+    else:
+        score -= mobility * 0.1
 
     return score
+
+
+def iterativeDeepening(gs, valid_moves):
+    """
+    Use iterative deepening to find the best move.
+    """
+    global next_move
+    next_move = None
+    depth = 1
+    while depth <= DEPTH:
+        findMoveNegMaxAlphaBeta(gs, valid_moves, depth, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+        depth += 1
+    return next_move
+
+
+def findBestMove(gs, valid_moves, return_queue):
+    best_move = iterativeDeepening(gs, valid_moves)
+    return_queue.put(best_move)
 
 
 def findRandomMove(validMoves):
@@ -128,3 +128,40 @@ def findRandomMove(validMoves):
     Picks and returns a random valid move.
     """
     return random.choice(validMoves)
+
+
+def basicScore(gs):
+    """
+    Calculate the basic score of the board.
+    A positive score is good for white, and a negative score is good for black.
+    """
+    score = 0
+    for row in range(len(gs.board)):
+        for col in range(len(gs.board[row])):
+            piece = gs.board[row][col]
+            if piece != "--":  # Not an empty square
+                # Assign values based on piece type
+                pieceValue = getPieceValue(piece[1])
+                if piece[0] == 'w':
+                    score += pieceValue
+                else:
+                    score -= pieceValue
+    return score
+
+
+def getPieceValue(pieceType):
+    """
+    Return the value of the piece based on its type.
+    """
+    if pieceType == 'p':  # Pawn
+        return 1
+    elif pieceType == 'N' or pieceType == 'B':  # Knight or Bishop
+        return 3
+    elif pieceType == 'R':  # Rook
+        return 5
+    elif pieceType == 'Q':  # Queen
+        return 9
+    elif pieceType == 'K':  # King
+        return 0  # Normally, we don't assign a value to the king in material score
+    else:
+        return 0  # This should not happen
