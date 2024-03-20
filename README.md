@@ -16,7 +16,7 @@ This was done as part of my 12th grade project, with the AI being done as part o
 
 
 ## Potential Improvements
-While the current AI provides a solid foundation for 7 year old me, several enhancements could further improve its performance and make the game experience more enriching:
+While the current AI provides a solid enemy for 7 year old me, several enhancements could further improve its performance and make the game experience more enriching:
 
 - Dynamic Depth Adjustment: Adjusting the search depth based on the complexity of the position or the stage of the game could improve performance and decision-making.
 - Opening Book: Implementing an opening book would allow the AI to play the initial phase of the game based on established theory, potentially leading to stronger play.
