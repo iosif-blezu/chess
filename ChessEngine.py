@@ -73,6 +73,8 @@ class GameState:
 
     def undoMove(self):
         if (len(self.moveLog)) != 0:
+            self.checkMate = False
+            self.staleMate = False
             move = self.moveLog.pop()
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
@@ -124,11 +126,26 @@ class GameState:
                 elif move.startCol == 7:  # right rook
                     self.currentCastlingRights.bks = False
 
+        if move.pieceCaptured == 'wR':
+            if move.endRow == 7:
+                if move.endCol == 0:
+                    self.currentCastlingRights.wqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRights.wks = False
+        elif move.pieceCaptured == 'bR':
+            if move.endRow == 0:
+                if move.endCol == 0:
+                    self.currentCastlingRights.bqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRights.bks = False
+
     """
     All moves, including check
     """
 
     def getValidMoves(self):
+        self.checkMate = False
+        self.staleMate = False
         temp_enpassant_possible = self.enpassantPossible
         temp_castle_rights = CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.bks,
                                           self.currentCastlingRights.wqs, self.currentCastlingRights.bqs)

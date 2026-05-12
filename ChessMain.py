@@ -66,7 +66,25 @@ def drawText(screen, text):
     screen.blit(textObject, textLocation)
 
 
-def main_pygame(playerOne, playerTwo):
+def choose_ai_difficulty():
+    print("Choose AI difficulty:")
+    print("  1. Easy.")
+    print("  2. Medium.")
+    print("  3. Hard.")
+    choice = input()
+    return {"1": "easy", "2": "medium", "3": "hard"}.get(choice, "hard")
+
+
+def apply_ai_move(gs, validMoves, ai_difficulty):
+    ai_move = AI.findBestMove(gs, validMoves, difficulty=ai_difficulty)
+    if ai_move is None:
+        ai_move = AI.findRandomMove(validMoves)
+    gs.makeMove(ai_move)
+    print("AI move:", ai_move.getChessNotation())
+    return True
+
+
+def main_pygame(playerOne, playerTwo, ai_difficulty="hard"):
     global return_queue
     p.init()
     p.mixer.init()
@@ -159,7 +177,7 @@ def main_pygame(playerOne, playerTwo):
             if not ai_thinking:
                 ai_thinking = True
                 return_queue = Queue()
-                move_finder_process = Process(target=AI.findBestMove, args=(gs, validMoves, return_queue))
+                move_finder_process = Process(target=AI.findBestMove, args=(gs, validMoves, return_queue, ai_difficulty))
                 move_finder_process.start()
 
             if not move_finder_process.is_alive():
@@ -199,7 +217,7 @@ def drawBoardConsole(gs):
         print(gs.board[r])
 
 
-def main_console(playerOne, playerTwo):
+def main_console(playerOne, playerTwo, ai_difficulty="hard"):
     global return_queue
     gs = ChessEngine.GameState()
     validMoves = gs.getValidMoves()
@@ -223,8 +241,24 @@ def main_console(playerOne, playerTwo):
 
     while running:
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
+        if not gameOver and not humanTurn and not move_undone:
+            moveMade = apply_ai_move(gs, validMoves, ai_difficulty)
+            validMoves = gs.getValidMoves()
+            moveMade = False
+            drawGameStateConsole(gs)
+            if gs.checkMate:
+                gameOver = True
+                if gs.whiteToMove:
+                    print('Black wins by checkmate')
+                else:
+                    print('White wins by checkmate')
+            elif gs.staleMate:
+                gameOver = True
+                print('Stalemate')
+            continue
+
         command = input("Enter command: ")
-        if len(command) == 4:
+        if command in ('z', 'r', 'q') or len(command) == 4:
             if not gameOver and humanTurn:
                 if command == 'z':  # undo on z press
                     gs.undoMove()
@@ -253,21 +287,6 @@ def main_console(playerOne, playerTwo):
                             moveMade = True
                             if gs.inCheck():
                                 print("Check")
-
-            if not gameOver and not humanTurn and not move_undone:
-                if not ai_thinking:
-                    ai_thinking = True
-                    return_queue = Queue()
-                    move_finder_process = Process(target=AI.findBestMove, args=(gs, validMoves, return_queue))
-                    move_finder_process.start()
-
-                if not move_finder_process.is_alive():
-                    ai_move = return_queue.get()
-                    if ai_move is None:
-                        ai_move = AI.findRandomMove(validMoves)
-                    gs.makeMove(ai_move)
-                    moveMade = True
-                    ai_thinking = False
 
             if moveMade:
                 validMoves = gs.getValidMoves()
@@ -314,12 +333,14 @@ if __name__ == "__main__":
         elif choice == '2':
             playerOne = True
             playerTwo = False
-            main_console(playerOne, playerTwo)
+            ai_difficulty = choose_ai_difficulty()
+            main_console(playerOne, playerTwo, ai_difficulty)
 
         elif choice == '3':
             playerOne = False
             playerTwo = True
-            main_console(playerOne, playerTwo)
+            ai_difficulty = choose_ai_difficulty()
+            main_console(playerOne, playerTwo, ai_difficulty)
 
     elif first_choice == "2":
         print("Choose mode:")
@@ -336,12 +357,14 @@ if __name__ == "__main__":
         elif choice == '2':
             playerOne = True
             playerTwo = False
-            main_pygame(playerOne, playerTwo)
+            ai_difficulty = choose_ai_difficulty()
+            main_pygame(playerOne, playerTwo, ai_difficulty)
 
         elif choice == '3':
             playerOne = False
             playerTwo = True
-            main_pygame(playerOne, playerTwo)
+            ai_difficulty = choose_ai_difficulty()
+            main_pygame(playerOne, playerTwo, ai_difficulty)
 
     else:
         print("Invalid choice.")

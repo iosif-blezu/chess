@@ -12,14 +12,18 @@ This was done as part of my 12th grade project, with the AI being done as part o
 
 ###### AI
 - Minimax Algorithm with Alpha-Beta Pruning: This decision-making process evaluates potential moves by looking ahead several steps and assuming optimal play from both sides. Alpha-beta pruning is used to significantly reduce the number of nodes evaluated, improving efficiency.
-- Positional Scoring: Beyond simple piece valuation, the AI also considers the positions of pieces, with specific scoring grids for different pieces. This encourages smarter positioning and tactical play.
+- Time-Limited Iterative Deepening: The AI keeps deepening while its time budget allows, then plays the best move from the deepest completed search.
+- Move Ordering and Quiescence Search: Captures, promotions, checks, and castling are searched first, while tactical capture sequences are extended to reduce horizon-effect blunders.
+- Transposition Table: Repeated positions are cached so equivalent move orders do not need to be searched from scratch.
+- Opening Book: A small built-in opening book gives the AI principled early-game moves before search takes over.
+- Positional Scoring: Beyond simple piece valuation, the AI also considers piece-square tables, mobility, king safety, and pawn structure. This encourages smarter positioning and tactical play.
+- Difficulty Levels: Easy, medium, and hard settings adjust randomness, depth, time budget, and search features.
 
 
 ## Potential Improvements
-While the current AI provides a solid enemy for 7 year old me, several enhancements could further improve its performance and make the game experience more enriching:
+While the current AI is much stronger than the first version, several enhancements could further improve its performance and make the game experience more enriching:
 
-- Dynamic Depth Adjustment: Adjusting the search depth based on the complexity of the position or the stage of the game could improve performance and decision-making.
-- Opening Book: Implementing an opening book would allow the AI to play the initial phase of the game based on established theory, potentially leading to stronger play.
+- Larger Opening Book: Expanding the built-in opening lines would improve variety and early-game accuracy.
 - Endgame Tablebases: Incorporating endgame tablebases for common endgame positions with limited pieces could enable the AI to play these phases perfectly.
 - Machine Learning Techniques: Applying machine learning could allow the AI to learn from past games and adjust its strategy based on successful patterns.
-- Parallel Processing: Utilizing parallel processing could significantly speed up the minimax search, allowing for deeper searches within the same time constraints.
+- Parallel Processing: Utilizing parallel processing inside the search could significantly speed up move evaluation, allowing for deeper searches within the same time constraints.
